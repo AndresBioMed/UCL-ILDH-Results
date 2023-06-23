@@ -1,0 +1,72 @@
+---
+title: "MTT#1 Cell Density"
+author: "Andrés Gordo"
+date: "2023-06-23"
+output:
+  pdf_document: 
+    fig_caption: yes
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Tidying the data
+
+First, I load the libraries needed and read the raw data from **Omega** in *.xlsx*. Then I create my **tidy data** selecting the proper values and assigning them to their corresponding **cell density**.
+
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+library(ggpubr)
+library(readxl)
+library(caret)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT1_ANDRES_PDX_236.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
+mtt_tidy<-mtt_tidy[1:45,] #This assigns the absorbances to the cell density
+mtt_tidy[1:12, 2]<- 2000
+mtt_tidy[13:24, 2]<- 5000
+mtt_tidy[25:36, 2]<- 8000
+mtt_tidy[37:45, 2]<- 10000
+```
+
+## Plotting with ggplot
+
+Violin plot with boxplot, adding a two sample *t test* for significance.
+
+```{r, echo=TRUE}
+
+density_comparisons<-list( c("2000", "5000"), 
+                         c("5000", "8000"),c("8000", "10000"))
+model<-lm(density~absorbance, mtt_tidy[1:36,])
+violin<- ggviolin(mtt_tidy,
+          x          = "density", 
+          y          = "absorbance", 
+          title      = "MTT#1 Results & Analysis",
+          xlab       = "Number of Cells seeded",
+          ylab       = "Absorbance",
+          fill       = "density",
+          palette = c("#c994c7", "#df65b0", "#980043", "#67001f"),
+          alpha      = 0.8,
+          add        = "boxplot",
+          add.params = list(fill = "white")) +
+  stat_compare_means(comparisons = density_comparisons, 
+                     label       = "p.signif", method="t.test")
+ 
+  
+violin
+```
+
+## Density checking
+
+While preparing the dilutions for the MTT I took less RPMI volume than I should have for the 10k cell density solution. Due to that, I could not fill all the wells, only having 9 compared to the 12 wells of the rest of the groups (2k, 5k, 8k). That means that there should be more than 10k cell per well. If I create a regression model trained with the 2k, 5k and 8k only, and then predict the cell density corresponding to the absorbance shown in the 10k well I should be able to ched whether the hypothesis is true.
+
+```{r, echo=TRUE, include=TRUE}
+model<-lm(density~absorbance, mtt_tidy[1:36,]) #I create the model
+prediction<-predict(model, mtt_tidy[37:45,]) #I predict the density 
+print(paste(c(round(mean(prediction)),"> 10k"), collapse = " ")) 
+#I print the mean of those predicted values
+
+```
+
+Indeed, *I seeded more cells per well in the 10k group than I should have*.
