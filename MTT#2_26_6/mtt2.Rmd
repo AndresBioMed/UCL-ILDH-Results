@@ -1,11 +1,10 @@
 ---
 title: "MTT#2 Cell Density"
 author: "Andrés Gordo"
-date: "2023-06-23"
+date: "2023-06-26"
 output:
-  pdf_document: 
-    fig_caption: yes
-  html_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -13,16 +12,14 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-## Tidying the data
-
-First, I load the libraries needed and read the raw data from **Omega** in *.xlsx*. Then I create my **tidy data** selecting the proper values and assigning them to their corresponding **cell density**.
-
-```{r,message=FALSE, warning=FALSE, echo=TRUE}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 library(ggpubr)
 library(readxl)
 library(caret)
 library(dplyr)
 library(tidyr)
+library(plotly)
+library(gt)
 mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT2_ANDRES_PDX_266.xlsx", col_names = FALSE)
 mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
 mtt_tidy<-mtt_tidy[1:45,] #This assigns the absorbances to the cell density
@@ -32,18 +29,15 @@ mtt_tidy[25:36, 2]<- 8000
 mtt_tidy[37:45, 2]<- 10000
 ```
 
-## Plotting with ggplot
 
-Violin plot with boxplot, adding a two sample *t test* for significance.
-
-```{r, echo=TRUE}
+```{r, echo=FALSE, message=FALSE}
 
 density_comparisons<-list( c("2000", "5000"), 
                          c("5000", "8000"),c("8000", "10000"))
 violin<- ggviolin(mtt_tidy,
           x          = "density", 
           y          = "absorbance", 
-          title      = "MTT#1 Results & Analysis",
+          title      = "MTT#2 Results & Analysis",
           xlab       = "Number of Cells seeded",
           ylab       = "Absorbance",
           fill       = "density",
@@ -53,16 +47,18 @@ violin<- ggviolin(mtt_tidy,
           add.params = list(fill = "white")) +
   stat_compare_means(comparisons = density_comparisons, 
                      label       = "p.signif", method="t.test")
- 
-  
+
+```
+```{r, echo=FALSE}
 violin
 ```
+
 ## Comparing MTT´s
-```{r}
+```{r, echo=FALSE, message=FALSE}
 mtt_andres<-mtt_tidy %>%
   group_by(density)%>%
   summarise(mean_abs<-mean(absorbance))%>%
-  rename("Andrés"="mean_abs <- mean(absorbance)")
+  rename("Andres"="mean_abs <- mean(absorbance)")
 
 mtt_maria<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT1_ANDRES_PDX_236.xlsx", col_names = FALSE)
 mtt_maria<-data.frame(absorbance=unlist(mtt_maria[4:9,3:10]), density=0)
@@ -74,7 +70,7 @@ mtt_maria[37:45, 2]<- 10000
 mtt_maria<-mtt_maria %>%
   group_by(density)%>%
   summarise(mean_abs<-mean(absorbance))%>%
-  rename("María"="mean_abs <- mean(absorbance)")
+  rename("Maria"="mean_abs <- mean(absorbance)")
 
 mtt1_2<-merge(mtt_andres,mtt_maria)
 ```
@@ -84,23 +80,24 @@ mtt1_2 %>%gt() %>%
   tab_style(
   style = list(cell_fill(color = "#b2f7ef"),
   cell_text(weight = "bold")),
-  locations = cells_body(columns = Andrés))%>%
+  locations = cells_body(columns = Andres))%>%
   tab_style(
   style = list(cell_fill(color = "#ffefb5"),
   cell_text(weight ="bold")), 
-  locations = cells_body(columns = María))
+  locations = cells_body(columns = Maria))
+
 ```
-```{r}
-mtt12_tidy <- pivot_longer(mtt1_2, cols = c("Andrés", "María"), names_to = "person", values_to = "mean_absorbance")
+```{r, echo=FALSE}
+mtt12_tidy <- pivot_longer(mtt1_2, cols = c("Andres", "Maria"), names_to = "person", values_to = "mean_absorbance")
 
 custom_palette <- c("#b2f7ef", "#ffefb5")
 
 # Create the plot
 g <- ggplot(mtt12_tidy, aes(x = factor(density), y = mean_absorbance, fill = person)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = custom_palette) +
   theme_minimal() +  # Use a minimal theme for a professional look
-  labs(x = "Density", y = "Mean Absorbance", fill = "Person") +  # Set axis and legend labels
+  labs(x = "Density", y = "Mean Absorbance", fill = "Person", title = "Differences between both MTT´s") +  # Set axis and legend labels
   theme(
     plot.title = element_text(size = 16, face = "bold"),  # Customize the title
     axis.title = element_text(size = 12, face = "bold"),  # Customize the axis titles
@@ -110,6 +107,7 @@ g <- ggplot(mtt12_tidy, aes(x = factor(density), y = mean_absorbance, fill = per
     legend.text = element_text(size = 8),  # Adjust the legend text size
     panel.grid.major.y = element_blank()  # Remove horizontal gridlines
   )
+ggplotly(g)
 ```
 
 
