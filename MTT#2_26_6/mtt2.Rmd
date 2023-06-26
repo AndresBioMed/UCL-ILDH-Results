@@ -1,0 +1,60 @@
+---
+title: "MTT#2 Cell Density"
+author: "Andrés Gordo"
+date: "2023-06-23"
+output:
+  pdf_document: 
+    fig_caption: yes
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Tidying the data
+
+First, I load the libraries needed and read the raw data from **Omega** in *.xlsx*. Then I create my **tidy data** selecting the proper values and assigning them to their corresponding **cell density**.
+
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+library(ggpubr)
+library(readxl)
+library(caret)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT2_ANDRES_PDX_266.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
+mtt_tidy<-mtt_tidy[1:45,] #This assigns the absorbances to the cell density
+mtt_tidy[1:12, 2]<- 2000
+mtt_tidy[13:24, 2]<- 5000
+mtt_tidy[25:36, 2]<- 8000
+mtt_tidy[37:45, 2]<- 10000
+```
+
+## Plotting with ggplot
+
+Violin plot with boxplot, adding a two sample *t test* for significance.
+
+```{r, echo=TRUE}
+
+density_comparisons<-list( c("2000", "5000"), 
+                         c("5000", "8000"),c("8000", "10000"))
+violin<- ggviolin(mtt_tidy,
+          x          = "density", 
+          y          = "absorbance", 
+          title      = "MTT#1 Results & Analysis",
+          xlab       = "Number of Cells seeded",
+          ylab       = "Absorbance",
+          fill       = "density",
+          palette = c("#c994c7", "#df65b0", "#980043", "#67001f"),
+          alpha      = 0.8,
+          add        = "boxplot",
+          add.params = list(fill = "white")) +
+  stat_compare_means(comparisons = density_comparisons, 
+                     label       = "p.signif", method="t.test")
+ 
+  
+violin
+```
+
+
+
