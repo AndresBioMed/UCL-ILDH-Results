@@ -1,0 +1,153 @@
+---
+title: "MTT#3 Cell Density"
+author: "Andrés Gordo"
+date: "2023-06-26"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(ggpubr)
+library(readxl)
+library(caret)
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(gt)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT5_ANDRES_PDX_037.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
+mtt_tidy<-mtt_tidy[1:48,] #This assigns the absorbances to the cell density
+mtt_tidy[1:12, 2]<- 2000
+mtt_tidy[13:24, 2]<- 5000
+mtt_tidy[25:36, 2]<- 8000
+mtt_tidy[37:48, 2]<- 10000
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+
+density_comparisons<-list( c("2000", "5000"), 
+                         c("5000", "8000"),c("8000", "10000"))
+violin<- ggviolin(mtt_tidy,
+          x          = "density", 
+          y          = "absorbance", 
+          title      = "MTT#5 Results & Analysis",
+          xlab       = "Number of Cells seeded",
+          ylab       = "Absorbance",
+          fill       = "density",
+          palette = c("#c994c7", "#df65b0", "#980043", "#67001f"),
+          alpha      = 0.8,
+          add        = "boxplot",
+          add.params = list(fill = "white")) +
+  stat_compare_means(comparisons = density_comparisons, 
+                     label       = "p.signif", method="t.test")
+
+```
+```{r, echo=FALSE}
+violin
+```
+
+## Comparing MTT´s
+```{r, echo=FALSE, message=FALSE}
+mtt_03_07<-mtt_tidy %>%
+  group_by(density)%>%
+  summarise(mean_abs<-mean(absorbance))%>%
+  rename("Andres_03_07"="mean_abs <- mean(absorbance)")
+
+mtt_30_06<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT3_ANDRES_PDX_306.xlsx", col_names = FALSE)
+mtt_30_06<-data.frame(absorbance=unlist(mtt_30_06[4:9,3:10]), density=0)
+mtt_30_06<-mtt_30_06[1:48,] #This assigns the absorbances to the cell density
+mtt_30_06[1:12, 2]<- 2000
+mtt_30_06[13:24, 2]<- 5000
+mtt_30_06[25:36, 2]<- 8000
+mtt_30_06[37:48, 2]<- 10000
+mtt_30_06<-mtt_30_06 %>%
+  group_by(density)%>%
+  summarise(mean_abs<-mean(absorbance))%>%
+  rename("Andres_30_06"="mean_abs <- mean(absorbance)")
+
+mtt_26_06<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT2_ANDRES_PDX_266.xlsx", col_names = FALSE)
+mtt_26_06<-data.frame(absorbance=unlist(mtt_26_06[4:9,3:10]), density=0)
+mtt_26_06<-mtt_26_06[1:48,] #This assigns the absorbances to the cell density
+mtt_26_06[1:12, 2]<- 2000
+mtt_26_06[13:24, 2]<- 5000
+mtt_26_06[25:36, 2]<- 8000
+mtt_26_06[37:48, 2]<- 10000
+mtt_26_06<-mtt_26_06 %>%
+  group_by(density)%>%
+  summarise(mean_abs<-mean(absorbance))%>%
+  rename("Andres_26_6"="mean_abs <- mean(absorbance)")
+
+mtt_maria<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT1_ANDRES_PDX_236.xlsx", col_names = FALSE)
+mtt_maria<-data.frame(absorbance=unlist(mtt_maria[4:9,3:10]), density=0)
+mtt_maria<-mtt_maria[1:45,] #This assigns the absorbances to the cell density
+mtt_maria[1:12, 2]<- 2000
+mtt_maria[13:24, 2]<- 5000
+mtt_maria[25:36, 2]<- 8000
+mtt_maria[37:45, 2]<- 10000
+mtt_maria<-mtt_maria %>%
+  group_by(density)%>%
+  summarise(mean_abs<-mean(absorbance))%>%
+  rename("Maria"="mean_abs <- mean(absorbance)")
+
+
+mtt_combined<-merge(mtt_03_07,mtt_26_06)
+mtt_combined<-merge(mtt_combined, mtt_maria)
+mtt_combined<-merge(mtt_combined, mtt_30_06)
+```
+```{r}
+mtt_combined %>%gt() %>%
+  tab_header(title="Absorbances table") %>%
+  tab_style(
+  style = list(cell_fill(color = "#add8e6"),
+  cell_text(weight = "bold")),
+  locations = cells_body(columns = Andres_30_06))%>%
+  tab_style(
+  style = list(cell_fill(color = "#87CEEB"),
+  cell_text(weight ="bold")), 
+  locations = cells_body(columns = Andres_26_6))%>%
+  tab_style(
+  style = list(cell_fill(color = "#87CEEB"),
+  cell_text(weight ="bold")), 
+  locations = cells_body(columns = Andres_03_07))%>%
+  tab_style(
+  style = list(cell_fill(color = "#ffefb5"),
+  cell_text(weight ="bold")), 
+  locations = cells_body(columns = Maria))
+  
+
+```
+```{r, echo=FALSE}
+mtt_combinedtidy <- pivot_longer(mtt_combined, cols = c("Andres_30_06", "Andres_26_6","Andres_03_07","Maria"), names_to = "person", values_to = "mean_absorbance")
+
+custom_palette <- c("#add8e6", "#87CEEB","#81CEFF", "#ffefb5")
+
+# Create the plot
+g <- ggplot(mtt_combinedtidy, aes(x = factor(density), y = mean_absorbance, fill = person)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = custom_palette) +
+  theme_minimal() +  # Use a minimal theme for a professional look
+  labs(x = "Density", y = "Mean Absorbance", fill = "Person", title = "Differences between both MTT´s") +  # Set axis and legend labels
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),  # Customize the title
+    axis.title = element_text(size = 12, face = "bold"),  # Customize the axis titles
+    axis.text = element_text(size = 10),  # Adjust the axis text size
+    legend.position = "right",  # Move the legend to the right
+    legend.title = element_text(size = 10),  # Customize the legend title size
+    legend.text = element_text(size = 8),  # Adjust the legend text size
+    panel.grid.major.y = element_blank()  # Remove horizontal gridlines
+  )
+g
+```
+
+
+
+
+
