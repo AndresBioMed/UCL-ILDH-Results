@@ -3,9 +3,9 @@ title: "MTT#3 Cell Density"
 author: "Andrés Gordo"
 date: "2023-06-26"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -23,11 +23,11 @@ library(plotly)
 library(gt)
 mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT3_ANDRES_PDX_306.xlsx", col_names = FALSE)
 mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
-mtt_tidy<-mtt_tidy[1:45,] #This assigns the absorbances to the cell density
+mtt_tidy<-mtt_tidy[1:48,] #This assigns the absorbances to the cell density
 mtt_tidy[1:12, 2]<- 2000
 mtt_tidy[13:24, 2]<- 5000
 mtt_tidy[25:36, 2]<- 8000
-mtt_tidy[37:45, 2]<- 10000
+mtt_tidy[37:48, 2]<- 10000
 ```
 
 
@@ -63,7 +63,7 @@ mtt_andres<-mtt_tidy %>%
 
 mtt2<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT2_ANDRES_PDX_266.xlsx", col_names = FALSE)
 mtt2<-data.frame(absorbance=unlist(mtt2[4:9,3:10]), density=0)
-mtt2<-mtt2[1:45,] #This assigns the absorbances to the cell density
+mtt2<-mtt2[1:48,] #This assigns the absorbances to the cell density
 mtt2[1:12, 2]<- 2000
 mtt2[13:24, 2]<- 5000
 mtt2[25:36, 2]<- 8000
@@ -79,7 +79,7 @@ mtt_maria<-mtt_maria[1:45,] #This assigns the absorbances to the cell density
 mtt_maria[1:12, 2]<- 2000
 mtt_maria[13:24, 2]<- 5000
 mtt_maria[25:36, 2]<- 8000
-mtt_maria[37:45, 2]<- 10000
+mtt_maria[37:48, 2]<- 10000
 mtt_maria<-mtt_maria %>%
   group_by(density)%>%
   summarise(mean_abs<-mean(absorbance))%>%

@@ -22,11 +22,11 @@ library(plotly)
 library(gt)
 mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT2_ANDRES_PDX_266.xlsx", col_names = FALSE)
 mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:10]), density=0)
-mtt_tidy<-mtt_tidy[1:45,] #This assigns the absorbances to the cell density
+mtt_tidy<-mtt_tidy[1:48,] #This assigns the absorbances to the cell density
 mtt_tidy[1:12, 2]<- 2000
 mtt_tidy[13:24, 2]<- 5000
 mtt_tidy[25:36, 2]<- 8000
-mtt_tidy[37:45, 2]<- 10000
+mtt_tidy[37:48, 2]<- 10000
 ```
 
 
@@ -62,11 +62,11 @@ mtt_andres<-mtt_tidy %>%
 
 mtt_maria<-read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT1_ANDRES_PDX_236.xlsx", col_names = FALSE)
 mtt_maria<-data.frame(absorbance=unlist(mtt_maria[4:9,3:10]), density=0)
-mtt_maria<-mtt_maria[1:45,] #This assigns the absorbances to the cell density
+mtt_maria<-mtt_maria[1:48,] #This assigns the absorbances to the cell density
 mtt_maria[1:12, 2]<- 2000
 mtt_maria[13:24, 2]<- 5000
 mtt_maria[25:36, 2]<- 8000
-mtt_maria[37:45, 2]<- 10000
+mtt_maria[37:48, 2]<- 10000
 mtt_maria<-mtt_maria %>%
   group_by(density)%>%
   summarise(mean_abs<-mean(absorbance))%>%
