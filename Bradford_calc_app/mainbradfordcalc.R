@@ -5,6 +5,7 @@ library(dplyr)
 library(tidyr)
 library(plotly)
 library(gt)
+library(webshot2)
 #reading the bradford excel
 bradford_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\GitHub Repository UCL\\UCL-ILDH-Results\\bradfordtest.xlsx", col_names = FALSE)
 bradford_train<-data.frame(absorbance=unlist(bradford_raw[1:9,2:3]), concentration=0)
@@ -41,6 +42,7 @@ final_table$ripa<-final_table$final_volume-(final_table$volume_sample+final_tabl
 final_table<-final_table %>% 
   mutate_if(is.numeric, round, digits=3)%>%
   relocate(sample, absorbance, concentrations, laemli4x, ripa, volume_sample, final_volume)
+names(final_table)<-c("Sample","Absorbance","µg/µL protein","Laemli 4X","RIPA","Volume of Sample","Final Volume")
 
 total_laemli<-sum(final_table$laemli4x)
 tbl <- gt(final_table)
