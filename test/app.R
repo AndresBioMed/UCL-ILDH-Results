@@ -6,15 +6,18 @@ library(tidyr)
 library(plotly)
 library(gt)
 library(webshot2)
+library(shinythemes)
 
 # Define the UI
 ui <- fluidPage(
   titlePanel("Bradford Analysis"),
+  theme = shinytheme("cerulean"),
   sidebarLayout(
     sidebarPanel(
       fileInput("file", "Choose Excel File", accept = c(".xlsx")),
       sliderInput("micrograms", "Micrograms Sample", min = 0, max = 100, value = 60),
       textInput("dilution", "Dilution", value = "1.5"),
+      actionButton("openLink", "Sample.xlsx"),
       actionButton("runButton", "Run Analysis"),
       downloadButton("downloadTable", "Download Table")
     ),
@@ -27,6 +30,10 @@ ui <- fluidPage(
 
 # Define the server
 server <- function(input, output) {
+  
+  observeEvent(input$openLink, {
+    browseURL("https://www.example.com")  # Replace with your desired web link
+  })
   
   # Reactive value for micrograms_sample
   micrograms_sample <- reactive({
