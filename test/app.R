@@ -5,7 +5,7 @@ library(dplyr)
 library(tidyr)
 library(plotly)
 library(gt)
-library(webshot)
+library(webshot2)
 
 # Define the UI
 ui <- fluidPage(
