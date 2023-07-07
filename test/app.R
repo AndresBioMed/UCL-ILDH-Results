@@ -1,7 +1,10 @@
-library(shiny)
-library(ggplot2)
-library(gt)
+library(ggpubr)
 library(readxl)
+library(caret)
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(gt)
 library(webshot2)
 
 # Define the UI
@@ -12,6 +15,7 @@ ui <- fluidPage(
       fileInput("file", "Choose Excel File", accept = c(".xlsx")),
       sliderInput("micrograms", "Micrograms Sample", min = 0, max = 100, value = 60),
       textInput("dilution", "Dilution", value = "1.5"),
+      actionButton("runButton", "Run Analysis"),
       downloadButton("downloadTable", "Download Table")
     ),
     mainPanel(
@@ -55,8 +59,14 @@ server <- function(input, output) {
     #`predicting concentration`
     final_table$concentrations<-predict.lm(brd_line, final_table)  # Replace with your code
     
-    # Apply the dilution
-    dilution <- as.numeric(input$dilution)
+    # Apply the dilutionobserveEvent(input$runButton, {
+      micrograms_sample <- reactive({
+        input$micrograms
+      })
+      
+      dilution <- as.numeric(input$dilution)
+  
+    
     final_table$concentrations <- final_table$concentrations * dilution
     
     # Calculate volumes based on micrograms_sample
@@ -101,8 +111,10 @@ server <- function(input, output) {
       brd_plot
     })
     
-    output$table <- render_gt({
-      tbl
+    observeEvent(input$runButton, {
+      output$table <- render_gt({
+       tbl
+      })
     })
   })
   
