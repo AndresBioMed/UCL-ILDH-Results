@@ -47,8 +47,31 @@ server <- function(input, output) {
     bradford_train[c(9,18), 2]<- 40
     brd_line <- lm(concentration~absorbance, bradford_train)
     # ... Code for brd_plot ...
-    brd_plot <- ggplot(bradford_train, aes(x=concentration,y=absorbance))+geom_smooth(method = "lm", formula = y ~ x) +geom_point() + stat_cor(label.y = 0.9)+ 
-      stat_regline_equation(label.y = 1)+labs(x="bsa")
+    # Load the necessary libraries
+   # for stat_cor and stat_regline_equation
+    
+    # Set theme options for a professional look
+    theme_set(theme_bw(base_size = 12, base_family = "Arial"))
+    
+    # Create the plot
+    brd_plot <- ggplot(bradford_train, aes(x = concentration, y = absorbance)) +
+      geom_smooth(method = "lm", formula = y ~ x, se = FALSE) +
+      geom_point() +
+      stat_cor(label.y = 0.9, label.x = 0.1) +
+      stat_regline_equation(label.y = 0.95, label.x = 0.1) +
+      labs(x = "Concentration", y = "Absorbance", title = "Bradford Training Data")
+    
+    # Customize the plot theme
+    brd_plot +
+      theme(
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.position = "bottom"
+      )
+    
     
     
     # ... Code for final_table ...
@@ -79,9 +102,12 @@ server <- function(input, output) {
     final_table <- final_table %>%
       mutate_if(is.numeric, round, digits = 3) %>%
       relocate(sample, absorbance, concentrations, laemli4x, ripa, volume_sample, final_volume)
+  
     names(final_table)<-c("Sample","Absorbance","µg/µL protein","Laemli 4X","RIPA","Volume of Sample","Final Volume")
+    total_laemli<-sum(final_table$`Laemli 4X`)
     # Create the gt table
     tbl <- gt(final_table)
+   
     
     # ... Code for styling the table ...
     tbl <- tbl %>%
