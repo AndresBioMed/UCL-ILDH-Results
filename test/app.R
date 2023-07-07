@@ -5,7 +5,7 @@ library(dplyr)
 library(tidyr)
 library(plotly)
 library(gt)
-library(webshot2)
+library(webshot)
 
 # Define the UI
 ui <- fluidPage(
@@ -103,8 +103,8 @@ server <- function(input, output) {
       mutate_if(is.numeric, round, digits = 3) %>%
       relocate(sample, absorbance, concentrations, laemli4x, ripa, volume_sample, final_volume)
   
-    names(final_table)<-c("Sample","Absorbance","µg/µL protein","Laemli 4X","RIPA","Volume of Sample","Final Volume")
-    total_laemli<-sum(final_table$`Laemli 4X`)
+    names(final_table)<-c("Sample","Absorbance","µg/µL protein","Laemli Solution","RIPA","Volume of Sample","Final Volume")
+    total_laemli<-sum(final_table$`Laemli Solution`)
     # Create the gt table
     tbl <- gt(final_table)
    
@@ -128,7 +128,7 @@ server <- function(input, output) {
                      cell_text(weight ="bold")), 
         locations = cells_body(columns = 7))%>%
       tab_footnote(
-        footnote=paste(as.character(total_laemli), "µL of Laemli 4X will be needed", sep=" "),
+        footnote=paste(round((total_laemli)/0.75), "µL of Laemli Solution will be needed. Add",round((total_laemli)/0.75)*0.1,"µL of Mercapto 10% into",round((total_laemli)/0.75)*0.9, "µL of Laemli 4X", sep=" "),
         locations = NULL,
         placement = "auto"
       )
@@ -144,16 +144,25 @@ server <- function(input, output) {
     })
   })
   
-  # Download the table as PDF
+  # Download the table as PNG
+  # Download the table as PNG
   output$downloadTable <- downloadHandler(
     filename = function() {
-      paste("table", Sys.Date(), ".pdf", sep = "_")
+      paste("table", Sys.Date(), ".png", sep = "_")
     },
     content = function(file) {
-      gtsave(tbl, file = file)
+      # Save the table as a temporary HTML file
+      tmp_file <- tempfile(fileext = ".html")
+      gtsave(tbl, file = tmp_file)
+      
+      # Use webshot2 to capture a screenshot of the HTML file
+      webshot2::webshot(url = tmp_file, file = file, delay = 2)
+      
+      # Delete the temporary HTML file
+      file.remove(tmp_file)
     }
   )
+  
 }
-
 # Run the application
 shinyApp(ui = ui, server = server)
