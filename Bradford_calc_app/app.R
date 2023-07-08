@@ -8,21 +8,20 @@ library(gt)
 library(webshot2)
 library(shinythemes)
 
-# Define the UI
 ui <- fluidPage(
-  titlePanel("Bradford Analysis for Western Blots"),
-  theme = shinytheme("flatly"),
+  titlePanel("Bradford Analysis"),
+  theme = shinytheme("flatly"),  # Change the overall theme to 'flatly'
   navbarPage(
-    "Western Blots Chart",
+    "Bradford Analysis",
+    theme = shinytheme("flatly"),  # Change the theme for the navbar
     tabPanel("Analysis",
              sidebarLayout(
                sidebarPanel(
-                 actionButton("openLink", "Sample.xlsx"),
+                 actionButton("openLink", "Sample.xlsx", class = "btn btn-info"),  # Set button color to info (blue)
                  fileInput("file", "Choose Excel File", accept = c(".xlsx")),
                  sliderInput("micrograms", "Micrograms Sample", min = 0, max = 100, value = 60),
                  textInput("dilution", "Dilution", value = "1.5"),
-                 actionButton("runButton", "Run Analysis"),
-                 downloadButton("downloadTable", "Download Table")
+                 downloadButton("downloadTable", "Download Table", class = "btn btn-success")  # Set button color to success (green)
                ),
                mainPanel(
                  plotOutput("brd_plot"),
@@ -32,21 +31,21 @@ ui <- fluidPage(
     ),
     tabPanel("Instructions",
              h3("How to Use the App"),
-             p("1. Click on the 'Sample.xlsx' button to see a sample file for demonstration purposes."),
-             p("2. Use the 'Choose Excel File' button to upload your own Excel file. Data must be located as in Sample.xlsx, so you may want to use it as a template."),
-             p("3. Adjust the 'Micrograms Sample' slider to set the desired value of micrograms of total protein per well."),
-             p("4. Enter the 'Dilution' value to specify the dilution factor of the samples (e.g if you used 50 µL of Bradford and 50 µL of sample, the dilution will equal 2"),
+             p("1. Click on the 'Sample.xlsx' button to open a sample file for demonstration purposes."),
+             p("2. Use the 'Choose Excel File' button to upload your own Excel file. The file should have a specific format, with absorbance values in columns B and C."),
+             p("3. Adjust the 'Micrograms Sample' slider to set the desired value of micrograms."),
+             p("4. Enter the 'Dilution' value to specify the dilution factor."),
              p("5. Click on the 'Run Analysis' button to perform the analysis and generate the plot and table."),
-             p("6. The plot will show the quality of the bradford prediction."),
-             p("7. The table will display the calculated volumes for loading the wells."),
+             p("6. The plot will show the relationship between concentration and absorbance based on the uploaded data."),
+             p("7. The table will display the calculated values for protein concentration and various volumes."),
              p("8. Use the 'Download Table' button to download the table as a PNG image.")
     ),
-    tabPanel("About/Copyright",
-             h3("Bradford Analysis for Western Blots"),
-             p("This app is designed to output the volume chart in loading the western blots samples."),
-             p("Created by Andrés Gordo Ortiz with love for the ILDH team."),
-             h2("Copyright"),
-             p("© 2023 Andrés Gordo Ortiz. No rights reserved.")
+    navbarMenu("About",
+               tabPanel("Information",
+                        h3("Bradford Analysis App"),
+                        p("This app is designed to perform Bradford analysis on protein samples based on spectrophotometric measurements."),
+                        p("Created by Andrés Gordo for the ILDH team.")
+               )
     )
   )
 )
@@ -55,7 +54,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   observeEvent(input$openLink, {
-    browseURL("https://www.example.com")  # Replace with your desired web link
+    browseURL("https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2FAndresBioMed%2FUCL-ILDH-Results%2Fmain%2FBradford_calc_app%2Fbradfordtest.xlsx&wdOrigin=BROWSELINK")  # Replace with your desired web link
   })
   
   # Reactive value for micrograms_sample
