@@ -18,6 +18,7 @@ bradford_train[c(7,16), 2]<- 30
 bradford_train[c(8,17), 2]<- 35
 bradford_train[c(9,18), 2]<- 40
 #bradford training
+
 brd_line <- lm(concentration~absorbance, bradford_train)
 brd_plot<-ggplot(bradford_train, aes(x=concentration,y=absorbance))
 brd_plot+geom_smooth(method = "lm", formula = y ~ x) +geom_point() + stat_cor(label.y = 0.9)+ 

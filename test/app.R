@@ -14,10 +14,10 @@ ui <- fluidPage(
   theme = shinytheme("cerulean"),
   sidebarLayout(
     sidebarPanel(
+      actionButton("openLink", "Sample.xlsx"),
       fileInput("file", "Choose Excel File", accept = c(".xlsx")),
       sliderInput("micrograms", "Micrograms Sample", min = 0, max = 100, value = 60),
       textInput("dilution", "Dilution", value = "1.5"),
-      actionButton("openLink", "Sample.xlsx"),
       actionButton("runButton", "Run Analysis"),
       downloadButton("downloadTable", "Download Table")
     ),
@@ -94,9 +94,7 @@ server <- function(input, output) {
         input$micrograms
       })
       
-      dilution <- as.numeric(input$dilution)
-  
-    
+    dilution <- as.numeric(input$dilution)
     final_table$concentrations <- final_table$concentrations * dilution
     
     # Calculate volumes based on micrograms_sample
