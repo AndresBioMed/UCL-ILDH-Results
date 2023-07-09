@@ -7,7 +7,10 @@ library(tidyr)
 library(plotly)
 library(gt)
 library(webshot2)
+library(webshot)
 library(shinythemes)
+library(htmltools)
+library(pagedown)
 
 ui <- fluidPage(
   titlePanel("Bradford Analysis for Western Blots"),
@@ -18,10 +21,11 @@ ui <- fluidPage(
     tabPanel("Analysis",
              sidebarLayout(
                sidebarPanel(
-                 actionButton("openLink", "Sample.xlsx", class = "btn btn-info"),  # Set button color to info (blue)
+                 tags$a(href="https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2FAndresBioMed%2FUCL-ILDH-Results%2Fmain%2FBradford_calc_app%2Fbradfordtest.xlsx&wdOrigin=BROWSELINK", 
+                        "Sample.xlsx file as template"),                 
+                 sliderInput("micrograms", "Micrograms Protein", min = 0, max = 100, value = 50),
+                 textInput("dilution", "Dilution", value = "2"),
                  fileInput("file", "Choose Excel File", accept = c(".xlsx")),
-                 sliderInput("micrograms", "Micrograms Sample", min = 0, max = 100, value = 60),
-                 textInput("dilution", "Dilution", value = "1.5"),
                  downloadButton("downloadTable", "Download Table", class = "btn btn-success")  # Set button color to success (green)
                ),
                mainPanel(
@@ -33,21 +37,23 @@ ui <- fluidPage(
     tabPanel("Instructions",
              h3("How to Use the App"),
              p("1. Click on the 'Sample.xlsx' button to open a sample excel file as a template."),
-             p("2. Use the 'Choose Excel File' button to upload your own Excel file. The data must be located as in Sample.xlsx."),
-             p("3. Adjust the 'Micrograms Sample' slider to set the desired value of protein micrograms per well."),
-             p("4. Enter the 'Dilution' value to specify the dilution factor used in samples. (e.g If you added 50 µL of Sample into 50 µL of Bradford the dilution will equal 2"),
-             p("5. Click on the 'Run Analysis' button to perform the analysis and generate the plot and table."),
-             p("6. The plot will show the quality of the Bradford prediction."),
-             p("7. The table will display the calculated volumes to load in the running wells."),
-             p("8. Use the 'Download Table' button to download the table as a PNG image.")
+             p("2. Adjust the 'Micrograms Sample' slider to set the desired value of protein micrograms per well."),
+             p("3. Enter the 'Dilution' value to specify the dilution factor used in samples. (e.g If you added 50 µL of Sample into 50 µL of Bradford the dilution will equal 2."),
+             p("4. Use the 'Choose Excel File' button to upload your own Excel file. The data must be located as in Sample.xlsx."),
+             p("5. The plot will show the quality of the Bradford prediction."),
+             p("6. The table will display the calculated volumes to load in the running wells."),
+             p("7. Use the 'Download Table' button to download the table as PDF.")
     ),
     tabPanel("About",
-             h3("Bradford Analysis App"),
+             h2("Bradford Analysis App"),
              p("This app is designed to perform Bradford analysis on protein samples based on spectrophotometric measurements."),
-             p("Created by Andrés Gordo for the ILDH team."),
-             h2("Copyright"),
+             p("Created by Andrés Gordo with love for the ILDH team."),
+             h3("Source Code in Open Access"),
+             tags$a(href="https://github.com/AndresBioMed/UCL-ILDH-Results/tree/4e62b84b431fe32003bf5f73492b3e3594186007/Bradford_calc_app", 
+                    "GitHub Repository and Scripts"),
+             h3("Copyright"),
              p("© 2023 Andrés Gordo Ortiz. Attribution 4.0 International (CC BY 4.0)")
-              
+             
     )
   )
 )
@@ -55,9 +61,6 @@ ui <- fluidPage(
 # Define the server
 server <- function(input, output) {
   
-  observeEvent(input$openLink, {
-    browseURL("https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2FAndresBioMed%2FUCL-ILDH-Results%2Fmain%2FBradford_calc_app%2Fbradfordtest.xlsx&wdOrigin=BROWSELINK")  # Replace with your desired web link
-  })
   
   # Reactive value for micrograms_sample
   micrograms_sample <- reactive({
@@ -101,6 +104,7 @@ server <- function(input, output) {
     
     # Generate the final table
     final_table <- bradford_raw[, 4:6]
+    final_table<-na.omit(final_table)
     names(final_table) <- c("Sample", "abs1", "abs2")
     final_table$absorbance <- rowMeans(final_table[, c("abs1", "abs2")], na.rm = TRUE)
     final_table <- final_table[, c("Sample", "absorbance")]
@@ -124,7 +128,7 @@ server <- function(input, output) {
     total_laemli <- sum(final_table$`Laemli Solution`)
     
     # Create the gt table
-    tbl <- gt(final_table) %>%
+    tbl_output <- gt(final_table) %>%
       tab_header(
         title = md("**Volumes Chart for Western Blots**"),
         subtitle = md("Everything is in **µL**")
@@ -154,29 +158,28 @@ server <- function(input, output) {
         locations = NULL,
         placement = "auto"
       )
-    
     output$table <- render_gt({
-      tbl
+      tbl_output
     })
+    output$downloadTable <- downloadHandler(
+      filename = function() {
+        paste("table", Sys.Date(), ".pdf", sep = "_")
+      },
+      content = function(file) {
+        # Save the table as a temporary HTML file
+        tmp_file <- tempfile(fileext = ".html")
+        gtsave(tbl_output, file = tmp_file)
+        
+        # Use the 'pagedown' package to convert the HTML file to PDF
+        pagedown::chrome_print(input = tmp_file, output = file,extra_args = c("--disable-gpu", 
+                                                                              "--no-sandbox"))
+        
+        # Delete the temporary HTML file
+        file.remove(tmp_file)
+      }
+    )
+    
   })
-  
-  # Download the table as PNG
-  output$downloadTable <- downloadHandler(
-    filename = function() {
-      paste("table", Sys.Date(), ".png", sep = "_")
-    },
-    content = function(file) {
-      # Save the table as a temporary HTML file
-      tmp_file <- tempfile(fileext = ".html")
-      gtsave(tbl, file = tmp_file)
-      
-      # Use webshot2 to capture a screenshot of the HTML file
-      webshot2::webshot(url = tmp_file, file = file, delay = 0)
-      
-      # Delete the temporary HTML file
-      file.remove(tmp_file)
-    }
-  )
 }
 
 # Run the application
