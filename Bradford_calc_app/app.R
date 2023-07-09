@@ -1,3 +1,4 @@
+options(java.parameters = "-Xss2048k")
 library(ggpubr)
 library(readxl)
 library(caret)
@@ -9,10 +10,10 @@ library(webshot2)
 library(shinythemes)
 
 ui <- fluidPage(
-  titlePanel("Bradford Analysis"),
+  titlePanel("Bradford Analysis for Western Blots"),
   theme = shinytheme("flatly"),  # Change the overall theme to 'flatly'
   navbarPage(
-    "Bradford Analysis",
+    "WB Volumes Chart",
     theme = shinytheme("flatly"),  # Change the theme for the navbar
     tabPanel("Analysis",
              sidebarLayout(
@@ -31,21 +32,22 @@ ui <- fluidPage(
     ),
     tabPanel("Instructions",
              h3("How to Use the App"),
-             p("1. Click on the 'Sample.xlsx' button to open a sample file for demonstration purposes."),
-             p("2. Use the 'Choose Excel File' button to upload your own Excel file. The file should have a specific format, with absorbance values in columns B and C."),
-             p("3. Adjust the 'Micrograms Sample' slider to set the desired value of micrograms."),
-             p("4. Enter the 'Dilution' value to specify the dilution factor."),
+             p("1. Click on the 'Sample.xlsx' button to open a sample excel file as a template."),
+             p("2. Use the 'Choose Excel File' button to upload your own Excel file. The data must be located as in Sample.xlsx."),
+             p("3. Adjust the 'Micrograms Sample' slider to set the desired value of protein micrograms per well."),
+             p("4. Enter the 'Dilution' value to specify the dilution factor used in samples. (e.g If you added 50 µL of Sample into 50 µL of Bradford the dilution will equal 2"),
              p("5. Click on the 'Run Analysis' button to perform the analysis and generate the plot and table."),
-             p("6. The plot will show the relationship between concentration and absorbance based on the uploaded data."),
-             p("7. The table will display the calculated values for protein concentration and various volumes."),
+             p("6. The plot will show the quality of the Bradford prediction."),
+             p("7. The table will display the calculated volumes to load in the running wells."),
              p("8. Use the 'Download Table' button to download the table as a PNG image.")
     ),
-    navbarMenu("About",
-               tabPanel("Information",
-                        h3("Bradford Analysis App"),
-                        p("This app is designed to perform Bradford analysis on protein samples based on spectrophotometric measurements."),
-                        p("Created by Andrés Gordo for the ILDH team.")
-               )
+    tabPanel("About",
+             h3("Bradford Analysis App"),
+             p("This app is designed to perform Bradford analysis on protein samples based on spectrophotometric measurements."),
+             p("Created by Andrés Gordo for the ILDH team."),
+             h2("Copyright"),
+             p("© 2023 Andrés Gordo Ortiz. Attribution 4.0 International (CC BY 4.0)")
+              
     )
   )
 )
@@ -64,7 +66,7 @@ server <- function(input, output) {
   
   # Read the Excel file and generate brd_plot and table
   observeEvent(input$file, {
-    bradford_raw <- read_excel(input$file$datapath, col_names = FALSE)
+    bradford_raw <- read_excel(input$file$datapath)
     bradford_train <- data.frame(absorbance = unlist(bradford_raw[1:9, 2:3]), concentration = 0)
     bradford_train[c(2,11), 2] <- 5
     bradford_train[c(3,12), 2] <- 10
