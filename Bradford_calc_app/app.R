@@ -49,13 +49,14 @@ ui <- fluidPage(
              icon = icon("question-circle"),  # Add icon to the tab label
              fluid = TRUE,  # Enable fluid layout for better spacing
              h3("How to Use the App"),
-             p("1. Click on the 'Sample.xlsx' button to open a sample excel file as a template."),
-             p("2. Adjust the 'Micrograms Sample' slider to set the desired value of protein micrograms per well."),
-             p("3. Enter the 'Dilution' value to specify the dilution factor used in samples. (e.g If you added 50 µL of Sample into 50 µL of Bradford the dilution will equal 2."),
-             p("4. Use the 'Choose Excel File' button to upload your own Excel file. The data must be located as in Sample.xlsx."),
+             p("1. Click on the Sample.xlsx button to open a sample excel file as a template."),
+             p("2. Adjust the Micrograms Sample slider to set the desired value of protein micrograms per well."),
+             p("3. Enter the Dilution value to specify the dilution factor used in samples. (e.g If you added 50 µL of Sample into 50 µL of Bradford the dilution will equal 2."),
+             p("4. Use the Choose Excel File button to upload your own Excel file. The data must be located as in Sample.xlsx."),
              p("5. The plot will show the quality of the Bradford prediction."),
              p("6. The table will display the calculated volumes to load in the running wells."),
-             p("7. Use the 'Download Table' button to download the table as PDF.")
+             p("7. Use the 'Download Table' button to download the table as PDF."),
+             p("8. If you wish to change the parameters, change them first and then load the .xlsx again")
     ),
     tabPanel("About",
              icon = icon("info-circle"),  # Add icon to the tab label
