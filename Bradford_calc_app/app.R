@@ -12,20 +12,31 @@ library(shinythemes)
 library(htmltools)
 library(pagedown)
 
+library(shiny)
+library(shinythemes)
+
 ui <- fluidPage(
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+  ),
   titlePanel("Bradford Analysis for Western Blots"),
   theme = shinytheme("flatly"),  # Change the overall theme to 'flatly'
   navbarPage(
     "WB Volumes Chart",
     theme = shinytheme("flatly"),  # Change the theme for the navbar
     tabPanel("Analysis",
+             icon = icon("chart-line"),  # Add icon to the tab label
              sidebarLayout(
                sidebarPanel(
-                 tags$a(href="https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2FAndresBioMed%2FUCL-ILDH-Results%2Fmain%2FBradford_calc_app%2Fbradfordtest.xlsx&wdOrigin=BROWSELINK", 
-                        "Sample.xlsx file as template"),                 
+                 tags$a(href = "https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fraw.githubusercontent.com%2FAndresBioMed%2FUCL-ILDH-Results%2Fmain%2FBradford_calc_app%2Fbradfordtest.xlsx&wdOrigin=BROWSELINK", 
+                        "Sample.xlsx file as template", target = "_blank"),  # Open link in a new tab
+                 br(),
                  sliderInput("micrograms", "Micrograms Protein", min = 0, max = 100, value = 50),
+                 br(),
                  textInput("dilution", "Dilution", value = "2"),
+                 br(),
                  fileInput("file", "Choose Excel File", accept = c(".xlsx")),
+                 br(),
                  downloadButton("downloadTable", "Download Table", class = "btn btn-success")  # Set button color to success (green)
                ),
                mainPanel(
@@ -35,6 +46,8 @@ ui <- fluidPage(
              )
     ),
     tabPanel("Instructions",
+             icon = icon("question-circle"),  # Add icon to the tab label
+             fluid = TRUE,  # Enable fluid layout for better spacing
              h3("How to Use the App"),
              p("1. Click on the 'Sample.xlsx' button to open a sample excel file as a template."),
              p("2. Adjust the 'Micrograms Sample' slider to set the desired value of protein micrograms per well."),
@@ -45,12 +58,14 @@ ui <- fluidPage(
              p("7. Use the 'Download Table' button to download the table as PDF.")
     ),
     tabPanel("About",
+             icon = icon("info-circle"),  # Add icon to the tab label
+             fluid = TRUE,  # Enable fluid layout for better spacing
              h2("Bradford Analysis App"),
              p("This app is designed to perform Bradford analysis on protein samples based on spectrophotometric measurements."),
              p("Created by Andrés Gordo with love for the ILDH team."),
              h3("Source Code in Open Access"),
-             tags$a(href="https://github.com/AndresBioMed/UCL-ILDH-Results/tree/4e62b84b431fe32003bf5f73492b3e3594186007/Bradford_calc_app", 
-                    "GitHub Repository and Scripts"),
+             tags$a(href = "https://github.com/AndresBioMed/UCL-ILDH-Results/tree/main/Bradford_calc_app", 
+                    "GitHub Repository and Scripts", target = "_blank"),  # Open link in a new tab
              h3("Copyright"),
              p("© 2023 Andrés Gordo Ortiz. Attribution 4.0 International (CC BY 4.0)")
              
