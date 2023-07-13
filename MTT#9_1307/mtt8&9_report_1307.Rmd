@@ -96,7 +96,7 @@ IC50<-IC(IC_data, inhib.percent = 50)
 g <- ggplot(mtt_tidy_2, aes(x = concentration_bpd, y = absorbance, fill = concentration_bpd)) +
   geom_bar(stat = "summary", position = "dodge") +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
-  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Dark MTT 10k cells/well") +
+  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well") +
   theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE) + annotate("text", x = Inf, y = Inf, hjust = 1.4, vjust = 1, label = paste("IC50 for BPD Light  is", round(IC50,digits = 4), sep=" "),fontface = 'italic')
 
 g
