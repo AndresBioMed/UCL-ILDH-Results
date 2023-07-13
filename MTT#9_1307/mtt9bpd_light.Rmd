@@ -1,0 +1,67 @@
+---
+title: "MTT#9 BPD Light"
+author: "Andrés Gordo"
+date: "2023-07-13"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+library(ggpubr)
+library(readxl)
+library(caret)
+library(dplyr)
+library(tidyr)
+library(dr4pl)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT9_ANDRES_PDX_137.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:11]), density=0)
+mtt_tidy<-mtt_tidy[1:54,] #This assigns the absorbances to the cell density
+mtt_tidy[1:6, 2]<- "Control_1"
+mtt_tidy[7:12, 2]<- 0.01
+mtt_tidy[13:18, 2]<- 0.05
+mtt_tidy[19:24, 2]<- 0.075
+mtt_tidy[25:30, 2]<- 0.1
+mtt_tidy[31:36, 2]<- 0.15
+mtt_tidy[37:42, 2]<- 0.2
+mtt_tidy[43:48, 2]<- 0.3
+mtt_tidy[49:54, 2]<- "Control_2"
+```
+
+
+```{r,message=FALSE, warning=FALSE, echo=TRUE}
+custom_colors <- c("#320E83", rev(c("#D8BFD8", "#C8A2C8", "#DA70D6","#8A58FF", "#A020F0", "#8A2BE2", "#4B0082")), "#320E83")
+mtt_tidy_2<-mtt_tidy%>%
+  group_by(density)%>%
+  mutate("mean_abs"=mean(absorbance), "sd_absorbance"=sd(absorbance))
+names(mtt_tidy_2)<-c("absorbance", "concentration_bpd", "mean","sd")
+custom_order <- c("Control_1", "0.01", "0.05", "0.075", "0.1", "0.15", "0.2", "0.3", "Control_2")
+
+# Reorder the "concentration_bpd" factor based on the custom order
+mtt_tidy_2$concentration_bpd <- factor(mtt_tidy_2$concentration_bpd, levels = custom_order)
+
+# Calculates IC50
+IC_data<-filter(mtt_tidy,density!="Control_1" & density!="Control_2")
+IC_data<-dr4pl(absorbance~as.numeric(density), data=IC_data)
+IC50<-IC(IC_data, inhib.percent = 50)
+
+# Create the plot
+g <- ggplot(mtt_tidy_2, aes(x = concentration_bpd, y = absorbance, fill = concentration_bpd)) +
+  geom_bar(stat = "summary", position = "dodge") +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
+  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Dark MTT 10k cells/well") +
+  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE) + annotate("text", x = Inf, y = Inf, hjust = 1.2, vjust = 1, label = paste("IC50 for BPD Light  is", round(IC50,digits = 3), sep=" "),fontface = 'italic')
+
+g
+
+```
+
+
+
+
