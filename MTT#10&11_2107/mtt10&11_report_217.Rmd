@@ -1,10 +1,10 @@
 ---
-title: "MTT BPD Dark vs Light"
+title: "2º MTT BPD Dark vs Light"
 author: "Andrés Gordo"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -20,9 +20,9 @@ library(tidyr)
 library(plotly)
 library(gt)
 library(dr4pl)
-mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT8_ANDRES_PDX_137.xlsx", col_names = FALSE)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT10_ANDRES_PDX_217.xlsx", col_names = FALSE)
 mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:11]), density=0)
-mtt_tidy<-mtt_tidy[1:54,] #This assigns the absorbances to the cell density
+mtt_tidy<-mtt_tidy[1:53,] #This assigns the absorbances to the cell density
 mtt_tidy[1:6, 2]<- "Control_1"
 mtt_tidy[7:12, 2]<- 0.01
 mtt_tidy[13:18, 2]<- 0.05
@@ -31,7 +31,7 @@ mtt_tidy[25:30, 2]<- 0.1
 mtt_tidy[31:36, 2]<- 0.15
 mtt_tidy[37:42, 2]<- 0.2
 mtt_tidy[43:48, 2]<- 0.3
-mtt_tidy[49:54, 2]<- "Control_2"
+mtt_tidy[49:53, 2]<- "Control_2"
 mtt_tidy<-mtt_tidy[-c(4:5),]
 ```
 
@@ -56,12 +56,13 @@ g <- ggplot(mtt_tidy_2, aes(x = concentration_bpd, y = absorbance, fill = concen
 
 g
 ```
+***The absorbance peak in both 0.15 and 0.2 uM BPD is most likely due to wrongly adding 110 uL to those wells, instead of 100 uL like the rest.***
 
 ## BPD Light
 At **2.5 J/cm<sup>2</sup>**, during **5 minutes and 52 seconds**.
 The Inhibitory Concentration 50 -*IC50*-, calculated with dr4pl is also shown
 ```{r,message=FALSE, warning=FALSE, echo=FALSE}
-mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT9_ANDRES_PDX_137.xlsx", col_names = FALSE)
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT11_ANDRES_PDX_217.xlsx", col_names = FALSE)
 mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:11]), density=0)
 mtt_tidy<-mtt_tidy[1:54,] #This assigns the absorbances to the cell density
 mtt_tidy[1:6, 2]<- "Control_1"
