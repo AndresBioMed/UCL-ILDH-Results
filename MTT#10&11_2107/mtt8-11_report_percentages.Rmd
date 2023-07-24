@@ -1,0 +1,178 @@
+---
+title: "MTT BPD Dark vs Light Comparison"
+subtitle: "With Relative Absorbances"
+author: "Andrés Gordo"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(ggpubr)
+library(ggpattern)
+library(readxl)
+library(caret)
+library(scales)
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(gt)
+library(dr4pl)
+#First Replica
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT8_ANDRES_PDX_137.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:11]), density=0)
+mtt_tidy<-mtt_tidy[1:54,] #This assigns the absorbances to the cell density
+mtt_tidy[1:6, 2]<- "Control"
+mtt_tidy[7:12, 2]<- 0.01
+mtt_tidy[13:18, 2]<- 0.05
+mtt_tidy[19:24, 2]<- 0.075
+mtt_tidy[25:30, 2]<- 0.1
+mtt_tidy[31:36, 2]<- 0.15
+mtt_tidy[37:42, 2]<- 0.2
+mtt_tidy[43:48, 2]<- 0.3
+mtt_tidy[49:54, 2]<- "Control"
+mtt_tidy<-mtt_tidy[-c(4:5),]
+#second Replica
+mtt_raw2 <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT10_ANDRES_PDX_217.xlsx", col_names = FALSE)
+mtt_tidy2<-data.frame(absorbance=unlist(mtt_raw2[4:9,3:11]), density=0)
+mtt_tidy2<-mtt_tidy2[1:53,] #This assigns the absorbances to the cell density
+mtt_tidy2[1:6, 2]<- "Control"
+mtt_tidy2[7:12, 2]<- 0.01
+mtt_tidy2[13:18, 2]<- 0.05
+mtt_tidy2[19:24, 2]<- 0.075
+mtt_tidy2[25:30, 2]<- 0.1
+mtt_tidy2[31:36, 2]<- 0.15
+mtt_tidy2[37:42, 2]<- 0.2
+mtt_tidy2[43:48, 2]<- 0.3
+mtt_tidy2[49:53, 2]<- "Control"
+mtt_tidy2<-mtt_tidy2[-c(4:5),]
+
+
+```
+
+## BPD Dark
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+custom_colors <- rep("purple", 9)
+mtt_tidyf<-mtt_tidy%>%
+  group_by(density)%>%
+  mutate("mean_abs"=mean(absorbance), "sd_absorbance"=sd(absorbance))%>%
+  mutate("Replica"="First")
+names(mtt_tidyf)<-c("absorbance", "concentration_bpd", "mean","sd","replica")
+mtt_tidyf$mean<-mtt_tidyf$mean/as.numeric(unique(mtt_tidyf[mtt_tidyf$concentration_bpd=="Control",3]))
+mtt_tidyf$sd<-mtt_tidyf$sd/as.numeric(unique(mtt_tidyf[mtt_tidyf$concentration_bpd=="Control",3]))
+
+mtt_tidy2f<-mtt_tidy2%>%
+  group_by(density)%>%
+  mutate("mean_abs"=mean(absorbance), "sd_absorbance"=sd(absorbance))%>%
+  mutate("Replica"="Second")
+names(mtt_tidy2f)<-c("absorbance", "concentration_bpd", "mean","sd","replica")
+mtt_tidy2f$mean<-mtt_tidy2f$mean/as.numeric(unique(mtt_tidy2f[mtt_tidy2f$concentration_bpd=="Control",3]))
+mtt_tidy2f$sd<-mtt_tidy2f$sd/as.numeric(unique(mtt_tidy2f[mtt_tidy2f$concentration_bpd=="Control",3]))
+custom_order <- c("Control", "0.01", "0.05", "0.075", "0.1", "0.15", "0.2", "0.3")
+
+# Reorder the "concentration_bpd" factor based on the custom order
+mtt_tidyf$concentration_bpd <- factor(mtt_tidyf$concentration_bpd, levels = custom_order)
+mtt_tidy2f$concentration_bpd <- factor(mtt_tidy2f$concentration_bpd, levels = custom_order)
+
+#Merge the dataframes
+mtt_final<-rbind(mtt_tidy2f, mtt_tidyf)
+# Create the plot
+g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration_bpd, pattern=replica)) +
+  geom_bar_pattern(stat = "summary", position = "dodge",color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1)  +scale_pattern_manual(values = c(First = "stripe", Second = "none"))+
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
+  labs(x = "BPD Concentration (microMolar)", y = "%Absorbance", title="BPD Dark MTT 10k cells/well") +
+  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent)
+
+g
+```
+
+***The absorbance peak in both 0.15 and 0.2 uM BPD of the Second replica is most likely due to wrongly adding 110 uL  of MTT reagent to those wells, instead of 100 uL like the rest.***
+
+## BPD Light
+At **2.5 J/cm<sup>2</sup>**, during **5 minutes and 52 seconds**.
+The Inhibitory Concentration 50 -*IC50*-, calculated with dr4pl is also shown
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+#First mtt
+mtt_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT9_ANDRES_PDX_137.xlsx", col_names = FALSE)
+mtt_tidy<-data.frame(absorbance=unlist(mtt_raw[4:9,3:11]), density=0)
+mtt_tidy<-mtt_tidy[1:54,] #This assigns the absorbances to the cell density
+mtt_tidy[1:6, 2]<- "Control"
+mtt_tidy[7:12, 2]<- 0.01
+mtt_tidy[13:18, 2]<- 0.05
+mtt_tidy[19:24, 2]<- 0.075
+mtt_tidy[25:30, 2]<- 0.1
+mtt_tidy[31:36, 2]<- 0.15
+mtt_tidy[37:42, 2]<- 0.2
+mtt_tidy[43:48, 2]<- 0.3
+mtt_tidy[49:54, 2]<- "Control"
+#Second MTT
+mtt_raw2 <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT11_ANDRES_PDX_217.xlsx", col_names = FALSE)
+mtt_tidy2<-data.frame(absorbance=unlist(mtt_raw2[4:9,3:11]), density=0)
+mtt_tidy2<-mtt_tidy2[1:54,] #This assigns the absorbances to the cell density
+mtt_tidy2[1:6, 2]<- "Control"
+mtt_tidy2[7:12, 2]<- 0.01
+mtt_tidy2[13:18, 2]<- 0.05
+mtt_tidy2[19:24, 2]<- 0.075
+mtt_tidy2[25:30, 2]<- 0.1
+mtt_tidy2[31:36, 2]<- 0.15
+mtt_tidy2[37:42, 2]<- 0.2
+mtt_tidy2[43:48, 2]<- 0.3
+mtt_tidy2[49:54, 2]<- "Control"
+```
+
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+custom_colors <- c("#320E83", rev(c("#D8BFD8", "#C8A2C8", "#DA70D6","#8A58FF", "#A020F0", "#8A2BE2", "#4B0082")), "#320E83")
+mtt_tidyf<-mtt_tidy%>%
+  group_by(density)%>%
+  mutate("mean_abs"=mean(absorbance), "sd_absorbance"=sd(absorbance))%>%
+  mutate("replica"="First")
+names(mtt_tidyf)<-c("absorbance", "concentration_bpd", "mean","sd", "replica")
+mtt_tidyf$mean<-mtt_tidyf$mean/as.numeric(unique(mtt_tidyf[mtt_tidyf$concentration_bpd=="Control",3]))
+mtt_tidyf$sd<-mtt_tidyf$sd/as.numeric(unique(mtt_tidyf[mtt_tidyf$concentration_bpd=="Control",3]))
+
+mtt_tidy2f<-mtt_tidy2%>%
+  group_by(density)%>%
+  mutate("mean_abs"=mean(absorbance), "sd_absorbance"=sd(absorbance))%>%
+  mutate("replica"="Second")
+names(mtt_tidy2f)<-c("absorbance", "concentration_bpd", "mean","sd","replica")
+mtt_tidy2f$mean<-mtt_tidy2f$mean/as.numeric(unique(mtt_tidy2f[mtt_tidy2f$concentration_bpd=="Control",3]))
+mtt_tidy2f$sd<-mtt_tidy2f$sd/as.numeric(unique(mtt_tidy2f[mtt_tidy2f$concentration_bpd=="Control",3]))
+
+# Reorder the "concentration_bpd" factor based on the custom order
+mtt_tidyf$concentration_bpd <- factor(mtt_tidyf$concentration_bpd, levels = custom_order)
+mtt_tidy2f$concentration_bpd <- factor(mtt_tidy2f$concentration_bpd, levels = custom_order)
+
+mtt_final<-rbind(mtt_tidy2f, mtt_tidyf)
+
+# Calculates IC50
+IC_data<-filter(mtt_tidy,density!="Control_1" & density!="Control_2")
+IC_data<-dr4pl(absorbance~as.numeric(density), data=IC_data)
+IC50<-IC(IC_data, inhib.percent = 50)
+
+IC_data2<-filter(mtt_tidy2,density!="Control_1" & density!="Control_2")
+IC_data2<-dr4pl(absorbance~as.numeric(density), data=IC_data2)
+IC50_2<-IC(IC_data2, inhib.percent = 50)
+
+
+# Create the plot
+g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration_bpd, pattern=replica)) +
+  geom_bar_pattern(stat = "summary", position = "dodge",color = "black", 
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1)  +scale_pattern_manual(values = c(First = "stripe", Second = "none")) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
+  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well") +
+  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE) + annotate("text", size=3, x = Inf, y = Inf, hjust = 1, vjust = 1, label = paste("IC50 for BPD Light are", round(IC50,digits = 4), "for the first replica and",round(IC50_2,digits = 4), "for the second replica.", sep=" "),fontface = 'italic')+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent, limits=c(0,1.2))
+
+g
+
+```
