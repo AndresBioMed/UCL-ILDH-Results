@@ -3,8 +3,8 @@ title: "2º MTT BPD Dark vs Light"
 author: "Andrés Gordo"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
