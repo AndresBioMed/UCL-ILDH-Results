@@ -79,7 +79,7 @@ mtt_maria<-mtt_maria[1:45,] #This assigns the absorbances to the cell density
 mtt_maria[1:12, 2]<- 2000
 mtt_maria[13:24, 2]<- 5000
 mtt_maria[25:36, 2]<- 8000
-mtt_maria[37:48, 2]<- 10000
+mtt_maria[37:45, 2]<- 10000
 mtt_maria<-mtt_maria %>%
   group_by(density)%>%
   summarise(mean_abs<-mean(absorbance))%>%
@@ -117,7 +117,7 @@ g <- ggplot(mtt_combinedtidy, aes(x = factor(density), y = mean_absorbance, fill
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = custom_palette) +
   theme_minimal() +  # Use a minimal theme for a professional look
-  labs(x = "Density", y = "Mean Absorbance", fill = "Person", title = "Differences between both MTT´s") +  # Set axis and legend labels
+  labs(x = "Density", y = "Mean Absorbance", fill = "Person", title = "Differences between MTTs") +  # Set axis and legend labels
   theme(
     plot.title = element_text(size = 16, face = "bold"),  # Customize the title
     axis.title = element_text(size = 12, face = "bold"),  # Customize the axis titles
@@ -127,7 +127,7 @@ g <- ggplot(mtt_combinedtidy, aes(x = factor(density), y = mean_absorbance, fill
     legend.text = element_text(size = 8),  # Adjust the legend text size
     panel.grid.major.y = element_blank()  # Remove horizontal gridlines
   )
-ggplotly(g)
+g
 ```
 
 
