@@ -1,6 +1,6 @@
 ---
 title: "MTT BPD Dark vs Light Comparison"
-subtitle: "With Relative Absorbances"
+subtitle: "PDX354 vs PDX185"
 author: "Andrés Gordo"
 date: "`r Sys.Date()`"
 output:
@@ -56,7 +56,16 @@ g <- ggplot(mtt_tidy_2, aes(x = concentration_bpd, y = absorbance, fill = concen
   geom_bar(stat = "summary", position = "dodge") +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
   labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Dark MTT 10k cells/well") +
-  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)
+  theme_minimal()+theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.position = "bottom",
+    legend.text = element_text(size = 12),
+    legend.title = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank()
+  )+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)
 
 g
 ```
@@ -142,8 +151,17 @@ g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration
                    pattern_angle = 45,
                    pattern_density = 0.1)  +scale_pattern_manual(values = c(PDX185 = "stripe", PDX354 = "none")) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
-  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well", subtitle = "PDX185 vs PDX354") +
-  theme_minimal()+scale_fill_manual(values = custom_colors) + annotate("text", size=3, x = Inf, y = Inf, hjust = 1, vjust = 1, label = paste("IC50 for BPD Light is", round(IC50,digits = 4), "for PDX354 and", round(IC50_2,digits = 4), "for PDX185.", sep=" "),fontface = 'italic')+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent, limits=c(0,1.2))
+  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well") +
+  theme_minimal()+theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.position = "bottom",
+    legend.text = element_text(size = 12),
+    legend.title = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank()
+  )+scale_fill_manual(values = custom_colors) + annotate("text", size=3, x = Inf, y = Inf, hjust = 1, vjust = 1, label = paste("IC50 for BPD Light is", round(IC50,digits = 4), "for PDX354 and", round(IC50_2,digits = 4), "for PDX185.", sep=" "),fontface = 'italic')+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent, limits=c(0,1.2))
 
 g
 ```
