@@ -55,7 +55,7 @@ mtt_tidy_2$concentration_bpd <- factor(mtt_tidy_2$concentration_bpd, levels = cu
 g <- ggplot(mtt_tidy_2, aes(x = concentration_bpd, y = absorbance, fill = concentration_bpd)) +
   geom_bar(stat = "summary", position = "dodge") +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
-  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Dark MTT 10k cells/well") +
+  labs(x = "BPD Concentration (uMolar)", y = "Absorbance", title="BPD Dark MTT 10k cells/well") +
   theme_minimal()+theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
     axis.text = element_text(size = 12),
@@ -151,7 +151,7 @@ g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration
                    pattern_angle = 45,
                    pattern_density = 0.1)  +scale_pattern_manual(values = c(PDX185 = "stripe", PDX354 = "none")) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
-  labs(x = "BPD Concentration (µMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well") +
+  labs(x = "BPD Concentration (uMolar)", y = "%Absorbance", title="BPD Light MTT PDX354 vs PDX185") +
   theme_minimal()+theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
     axis.text = element_text(size = 12),
