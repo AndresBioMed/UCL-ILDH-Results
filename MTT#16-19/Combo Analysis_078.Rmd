@@ -1,0 +1,189 @@
+---
+title: "MTT BPD Dark vs Light Comparison"
+subtitle: "PDX354 vs PDX185"
+author: "Andrés Gordo"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Introduction
+For this experiment for plates were used, two 96-well replicates to test the effect of **Metformin** and **Verteporfin** on PDX185, and two more for PDX354. Eight different conditions, 6 wells per condition and 12 controls wells per plate. 10k cells were seeded in each well in both strains. The BPD treated groups were illuminated at **2.5 J/cm<sup>2</sup>**, during **5 minutes and 52 seconds**.
+The data was separated by replicate and group and merged into a final data set, which can be exported through this code:
+```{r,r,message=TRUE, warning=FALSE, echo=TRUE, eval=FALSE}
+write.xlsx(mtt_final[,c(1:4,6)],"pdx_combo_final.xlsx", colNames = TRUE)
+
+```
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+library(ggpubr)
+library(ggpattern)
+library(readxl)
+library(caret)
+library(openxlsx)
+library(scales)
+library(dplyr)
+library(tidyr)
+library(gt)
+library(dr4pl)
+```
+
+```{r Read PDX354_1,message=FALSE, warning=FALSE, echo=FALSE}
+mtt16_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT16_ANDRES_PDX_078.xlsx", col_names = FALSE)
+mtt16_tidy<-data.frame(absorbance=unlist(mtt16_raw[4:9,3:12]), met=0, bpd=0, strain="PDX354", rep_flag=1, group=rep(c("Control", "Met10mM", "Met20mM", "BPD_0.2uM", "BPD_0.3uM", "Met10+BPD_0.2", "Met10+BPD_0.3", "Met20+BPD_0.2", "Met20+BPD_0.3", "Control"), each=6))
+mtt16_tidy[7:12,2]<- 10
+mtt16_tidy[13:18, 2]<- 20
+mtt16_tidy[19:24, 3]<- 0.2
+mtt16_tidy[25:30, 3]<- 0.3
+mtt16_tidy[31:36, 2]<- 10
+mtt16_tidy[31:36, 3]<- 0.2
+mtt16_tidy[37:42, 2]<- 10
+mtt16_tidy[37:42, 3]<- 0.3
+mtt16_tidy[43:48, 2]<- 20
+mtt16_tidy[43:48, 3]<- 0.2
+mtt16_tidy[49:54, 2]<- 20
+mtt16_tidy[49:54, 3]<- 0.3
+rownames(mtt16_tidy)<-1:length(mtt16_tidy$absorbance)
+
+mtt16_tidy<-mtt16_tidy[-31,]
+```
+
+```{r Read PDX354_2,message=FALSE, warning=FALSE, echo=FALSE}
+mtt17_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT17_ANDRES_PDX_078.xlsx", col_names = FALSE)
+mtt17_tidy<-data.frame(absorbance=unlist(mtt17_raw[4:9,3:12]), met=0, bpd=0, strain="PDX354", rep_flag=2, group=rep(c("Control", "Met10mM", "Met20mM", "BPD_0.2uM", "BPD_0.3uM", "Met10+BPD_0.2", "Met10+BPD_0.3", "Met20+BPD_0.2", "Met20+BPD_0.3", "Control"), each=6))
+mtt17_tidy[7:12,2]<- 10
+mtt17_tidy[13:18, 2]<- 20
+mtt17_tidy[19:24, 3]<- 0.2
+mtt17_tidy[25:30, 3]<- 0.3
+mtt17_tidy[31:36, 2]<- 10
+mtt17_tidy[31:36, 3]<- 0.2
+mtt17_tidy[37:42, 2]<- 10
+mtt17_tidy[37:42, 3]<- 0.3
+mtt17_tidy[43:48, 2]<- 20
+mtt17_tidy[43:48, 3]<- 0.2
+mtt17_tidy[49:54, 2]<- 20
+mtt17_tidy[49:54, 3]<- 0.3
+
+rownames(mtt17_tidy)<-1:length(mtt17_tidy$absorbance)
+
+mtt17_tidy<-mtt17_tidy[-c(7),]
+```
+
+```{r Read PDX185_1,message=FALSE, warning=FALSE, echo=FALSE}
+mtt18_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT18_ANDRES_PDX_078.xlsx", col_names = FALSE)
+mtt18_tidy<-data.frame(absorbance=unlist(mtt18_raw[4:9,3:12]), met=0, bpd=0, strain="PDX185", rep_flag=1, group=rep(c("Control", "Met10mM", "Met20mM", "BPD_0.2uM", "BPD_0.3uM", "Met10+BPD_0.2", "Met10+BPD_0.3", "Met20+BPD_0.2", "Met20+BPD_0.3", "Control"), each=6))
+mtt18_tidy[7:12,2]<- 10
+mtt18_tidy[13:18, 2]<- 20
+mtt18_tidy[19:24, 3]<- 0.2
+mtt18_tidy[25:30, 3]<- 0.3
+mtt18_tidy[31:36, 2]<- 10
+mtt18_tidy[31:36, 3]<- 0.2
+mtt18_tidy[37:42, 2]<- 10
+mtt18_tidy[37:42, 3]<- 0.3
+mtt18_tidy[43:48, 2]<- 20
+mtt18_tidy[43:48, 3]<- 0.2
+mtt18_tidy[49:54, 2]<- 20
+mtt18_tidy[49:54, 3]<- 0.3
+
+rownames(mtt18_tidy)<-1:length(mtt18_tidy$absorbance)
+
+mtt18_tidy<-mtt18_tidy[-c(5,6,10,12,13,18),]
+```
+
+```{r Read PDX185_2,message=FALSE, warning=FALSE, echo=FALSE}
+mtt19_raw <- read_excel("C:\\Users\\andre\\OneDrive - unizar.es\\Laboratorio\\UCL ILDH 2023\\Results\\MTT\\MTT19_ANDRES_PDX_078.xlsx", col_names = FALSE)
+mtt19_tidy<-data.frame(absorbance=unlist(mtt19_raw[4:9,3:12]), met=0, bpd=0, strain="PDX185", rep_flag=2, group=rep(c("Control", "Met10mM", "Met20mM", "BPD_0.2uM", "BPD_0.3uM", "Met10+BPD_0.2", "Met10+BPD_0.3", "Met20+BPD_0.2", "Met20+BPD_0.3", "Control"), each=6))
+mtt19_tidy[7:12,2]<- 10
+mtt19_tidy[13:18, 2]<- 20
+mtt19_tidy[19:24, 3]<- 0.2
+mtt19_tidy[25:30, 3]<- 0.3
+mtt19_tidy[31:36, 2]<- 10
+mtt19_tidy[31:36, 3]<- 0.2
+mtt19_tidy[37:42, 2]<- 10
+mtt19_tidy[37:42, 3]<- 0.3
+mtt19_tidy[43:48, 2]<- 20
+mtt19_tidy[43:48, 3]<- 0.2
+mtt19_tidy[49:54, 2]<- 20
+mtt19_tidy[49:54, 3]<- 0.3
+
+rownames(mtt19_tidy)<-1:length(mtt19_tidy$absorbance)
+
+mtt19_tidy<-mtt19_tidy[-c(6,15,17,19),]
+```
+
+
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
+#First mtt
+custom_order <- c("Control", "Met10mM", "Met20mM", "BPD_0.2uM", "Met10+BPD_0.2","Met20+BPD_0.2","BPD_0.3uM", "Met10+BPD_0.3", "Met20+BPD_0.3")
+mtt_final<-rbind(mtt19_tidy,mtt18_tidy, mtt17_tidy, mtt16_tidy)
+
+mtt_final$strain<-as.factor(mtt_final$strain)
+mtt_final<-mtt_final%>%
+  arrange(strain,match(group, custom_order))%>%
+  group_by(strain,group)%>%
+  mutate("mean"=mean(absorbance), "sd"=sd(absorbance))
+avg_mean<-numeric()
+avg_sd<-numeric()
+for (i in c("PDX185", "PDX354")){
+  avg_mean<-append(avg_mean,mtt_final$mean[mtt_final$strain==i]/unique(mtt_final$mean[mtt_final$strain==i & mtt_final$group=="Control"]))
+  avg_sd<-append(avg_sd,mtt_final$sd[mtt_final$strain==i]/unique(mtt_final$mean[mtt_final$strain==i & mtt_final$group=="Control"]))
+}
+mtt_final$avg_mean<-avg_mean
+mtt_final$avg_sd<-avg_sd
+
+
+
+```
+
+```{r stats,message=FALSE, warning=FALSE, echo=FALSE}
+fit1<-lm(absorbance~met+bpd, data=mtt_final)
+fit2<-lm(absorbance~bpd, data=mtt_final)
+fit185<-lm(absorbance~bpd*met, mtt_final[mtt_final$strain=="PDX185",])
+fit354<-lm(absorbance~bpd*met, mtt_final[mtt_final$strain=="PDX354",])
+```
+
+
+
+## Relative cell viability under Metformin-Verteporfin treatement
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+mtt_final$group <- factor(mtt_final$group, custom_order)
+# Define custom fill colors
+custom_colors <- c("#1f78b4", "#33a02c")
+
+# Create the plot
+plot <- ggplot(mtt_final, aes(x = group, y = avg_mean, fill = strain)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.6, color="black") +
+  geom_errorbar(aes(ymin = avg_mean - avg_sd, ymax = avg_mean + avg_sd),
+                position = position_dodge(width = 0.8), width = 0.25) +
+  labs(title = "Comparison of MTT BPD Between Dark and Light Conditions",
+       subtitle = "Strains: PDX354 vs PDX185",
+       x = "Group",
+       y = "Average Mean (Normalized)") +
+  scale_fill_manual(values = custom_colors, labels = c("PDX185", "PDX354")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        legend.title = element_blank(),
+        legend.position = "top",
+        legend.box = "horizontal")+
+  scale_y_continuous(labels = scales::percent, limits=c(0,1.3))
+
+# Print the plot
+print(plot)
+```
+
+## ANOVA Sinergy effect test
+### PDX185
+```{r}
+print(anova(fit185))
+```
+In case of PDX185, Metformin treatment does not seem to result in any significant change, neither does the synergy.
+
+###PDX354
+```{r}
+print(anova(fit354))
+```
+In PDX354 the res
