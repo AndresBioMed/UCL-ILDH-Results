@@ -159,7 +159,7 @@ plot <- ggplot(mtt_final, aes(x = group, y = avg_mean, fill = strain)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.6, color="black") +
   geom_errorbar(aes(ymin = avg_mean - avg_sd, ymax = avg_mean + avg_sd),
                 position = position_dodge(width = 0.8), width = 0.25) +
-  labs(title = "Comparison of MTT BPD Between Dark and Light Conditions",
+  labs(title = "Comparison of Cell Viability in MTT for Combo Treatment",
        subtitle = "Strains: PDX354 vs PDX185",
        x = "Group",
        y = "Average Mean (Normalized)") +
