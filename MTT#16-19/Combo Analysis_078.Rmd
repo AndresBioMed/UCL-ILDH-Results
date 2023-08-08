@@ -1,18 +1,18 @@
 ---
-title: "MTT BPD Dark vs Light Comparison"
-subtitle: "PDX354 vs PDX185"
+title: "Verteporfin-Metformin PDX Treatment"
+subtitle: "Combo Analysis"
 author: "Andrés Gordo"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Introduction
-For this experiment for plates were used, two 96-well replicates to test the effect of **Metformin** and **Verteporfin** on PDX185, and two more for PDX354. Eight different conditions, 6 wells per condition and 12 controls wells per plate. 10k cells were seeded in each well in both strains. The BPD treated groups were illuminated at **2.5 J/cm<sup>2</sup>**, during **5 minutes and 52 seconds**.
+For this experiment four plates were used, two 96-well replicates to test the effect of **Metformin** and **Verteporfin** on PDX185, and two more for PDX354. Eight different conditions, 6 wells per condition and 12 controls wells per plate. 10k cells were seeded in each well in both strains. The BPD treated groups were illuminated at **2.5 J/cm<sup>2</sup>**, during **5 minutes and 52 seconds**.
 The data was separated by replicate and group and merged into a final data set, which can be exported through this code:
 ```{r,r,message=TRUE, warning=FALSE, echo=TRUE, eval=FALSE}
 write.xlsx(mtt_final[,c(1:4,6)],"pdx_combo_final.xlsx", colNames = TRUE)
@@ -175,15 +175,15 @@ plot <- ggplot(mtt_final, aes(x = group, y = avg_mean, fill = strain)) +
 print(plot)
 ```
 
-## ANOVA Sinergy effect test
+## ANOVA Synergy effect test
 ### PDX185
-```{r}
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 print(anova(fit185))
 ```
-In case of PDX185, Metformin treatment does not seem to result in any significant change, neither does the synergy.
+***In case of PDX185, Metformin treatment does not seem to result in any significant change, neither does the synergy.***
 
-###PDX354
-```{r}
+### PDX354
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 print(anova(fit354))
 ```
-In PDX354 the res
+***In PDX354 the results are quite different. Metformin does seem to cause a significant difference in viability. Also, the effect of BPD alone is statistically different compared to the combo, thus, there is synergy.***
