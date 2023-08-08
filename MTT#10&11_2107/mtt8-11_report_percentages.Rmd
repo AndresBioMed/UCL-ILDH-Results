@@ -163,7 +163,7 @@ IC_data2<-dr4pl(absorbance~as.numeric(density), data=IC_data2)
 IC50_2<-IC(IC_data2, inhib.percent = 50)
 ```
 
-```{r}
+```{r,message=FALSE, warning=FALSE, echo=FALSE}
 # Create the plot
 g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration_bpd, pattern=replica)) +
   geom_bar_pattern(stat = "identity", position = "dodge",color = "black", 
@@ -171,8 +171,8 @@ g <- ggplot(mtt_final, aes(x = concentration_bpd, y = mean, fill = concentration
                    pattern_angle = 45,
                    pattern_density = 0.1)  +scale_pattern_manual(values = c(First = "stripe", Second = "none")) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge(width = 0.9), width = 0.25) +
-  labs(x = "BPD Concentration (uMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well") +
-  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE) + annotate("text", size=3, x = Inf, y = Inf, hjust = 0.9, vjust = 1, label = paste("IC50 for BPD Light is", round(IC50,digits = 4), "for the first replica and",round(IC50_2,digits = 4), "for the second replica.", sep=" "),fontface = 'italic')+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent, limits=c(0,1.2))
+  labs(x = "BPD Concentration (uMolar)", y = "Absorbance", title="BPD Light MTT 10k cells/well PDX185") +
+  theme_minimal()+scale_fill_manual(values = custom_colors)+guides(fill = FALSE) + annotate("text", size=3, x = Inf, y = Inf, hjust = 1, vjust = 1, label = paste("IC50 for BPD Light is", round(IC50,digits = 4), "for the first replica and",round(IC50_2,digits = 4), "for the second replica.", sep=" "),fontface = 'italic')+scale_fill_manual(values = custom_colors)+guides(fill = FALSE)+scale_y_continuous(labels = scales::percent, limits=c(0,1.2))
 
 g
 ```
