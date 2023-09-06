@@ -87,14 +87,14 @@ server <- function(input, output) {
   observeEvent(input$file, {
     bradford_raw <- read_excel(input$file$datapath)
     bradford_train <- data.frame(absorbance = unlist(bradford_raw[1:9, 2:3]), concentration = 0)
-    bradford_train[c(2,11), 2] <- 5
-    bradford_train[c(3,12), 2] <- 10
-    bradford_train[c(4,13), 2] <- 15
-    bradford_train[c(5,14), 2] <- 20
-    bradford_train[c(6,15), 2] <- 25
-    bradford_train[c(7,16), 2] <- 30
-    bradford_train[c(8,17), 2] <- 35
-    bradford_train[c(9,18), 2] <- 40
+    bradford_train[c(2,11), 2] <- .005
+    bradford_train[c(3,12), 2] <- .01
+    bradford_train[c(4,13), 2] <- .015
+    bradford_train[c(5,14), 2] <- 0.02
+    bradford_train[c(6,15), 2] <- .025
+    bradford_train[c(7,16), 2] <- .030
+    bradford_train[c(8,17), 2] <- .035
+    bradford_train[c(9,18), 2] <- .040
     brd_line <- lm(concentration ~ absorbance, bradford_train)
     
     # Create the plot
